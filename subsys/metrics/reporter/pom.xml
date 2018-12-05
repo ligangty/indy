@@ -68,6 +68,10 @@
       <groupId>org.elasticsearch</groupId>
       <artifactId>metrics-elasticsearch-reporter</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.newrelic.agent.java</groupId>
+      <artifactId>newrelic-api</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

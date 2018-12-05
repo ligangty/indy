@@ -100,6 +100,12 @@ public class IndyMetricsConfig
 
     private final static String INDY_METRICS_KOJI_ENABLED = "koji.enabled";
 
+    private final static String INDY_NEWRELIC_ENABLED = "newrelic.enabled";
+
+    private final static String INDY_METRICS_REPORTER_NEWRELIC_SIMPLE_PERIOD = "newrelic.reporter.simple.period";
+
+    private final static String INDY_METRICS_REPORTER_NEWRELIC_PREFIX = "newrelic.reporter.prefix";
+
     private boolean ispnMetricsEnabled;
 
     private String ispnGauges;
@@ -163,6 +169,12 @@ public class IndyMetricsConfig
     private boolean kojiMetricEnabled;
 
     private String nodePrefix;
+
+    private boolean newrelicEnabled;
+
+    private String newrelicPrefix;
+
+    private int newrelicSimplePeriod;
 
     public boolean isMeasureTransport()
     {
@@ -513,6 +525,39 @@ public class IndyMetricsConfig
     public String getIspnGauges()
     {
         return ispnGauges;
+    }
+
+    @ConfigName( INDY_NEWRELIC_ENABLED )
+    public void setNewrelicEnabled( boolean newrelicEnabled )
+    {
+        this.newrelicEnabled = newrelicEnabled;
+    }
+
+    public boolean isNewrelicEnabled()
+    {
+        return newrelicEnabled;
+    }
+
+    public int getNewrelicSimplePeriod()
+    {
+        return newrelicSimplePeriod;
+    }
+
+    @ConfigName( INDY_METRICS_REPORTER_NEWRELIC_SIMPLE_PERIOD )
+    public void setNewrelicSimplePeriod( int newrelicSimplePeriod )
+    {
+        this.newrelicSimplePeriod = newrelicSimplePeriod;
+    }
+
+    public String getNewrelicPrefix()
+    {
+        return newrelicPrefix;
+    }
+
+    @ConfigName( INDY_METRICS_REPORTER_NEWRELIC_PREFIX )
+    public void setNewrelicPrefix( String newrelicPrefix )
+    {
+        this.newrelicPrefix = newrelicPrefix;
     }
 
     public String getDefaultConfigFileName()

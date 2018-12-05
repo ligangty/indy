@@ -20,6 +20,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import org.commonjava.indy.metrics.conf.IndyMetricsConfig;
+import org.commonjava.indy.metrics.newrelic.NewRelicInsightsReporter;
 import org.commonjava.indy.metrics.zabbix.cache.ZabbixCacheStorage;
 import org.commonjava.indy.metrics.zabbix.reporter.IndyZabbixReporter;
 import org.commonjava.indy.metrics.zabbix.sender.IndyZabbixSender;
@@ -49,6 +50,8 @@ public class ReporterIntializer
     public final static String INDY_METRICS_REPORTER_ZABBIXREPORTER = "zabbix";
 
     public final static String INDY_METRICS_REPORTER_ELKEPORTER = "elasticsearch";
+
+    public final static String INDY_METRICS_NEWRELIC_REPORTER = "newrelic";
 
     @Inject
     private IndyHttpProvider indyHttpProvider;
@@ -88,6 +91,11 @@ public class ReporterIntializer
         {
             initELKReporterForSimpleMetric( metrics, config );
             initELKReporterForJVMMetric( metrics, config );
+        }
+
+        if ( this.isExistReporter( INDY_METRICS_NEWRELIC_REPORTER ) )
+        {
+            initNewRelicrReporter( metrics, config );
         }
     }
 
@@ -210,5 +218,19 @@ public class ReporterIntializer
                                                               .metricsZabbixCache( cache )
                                                               .build();
         return zabbixSender;
+    }
+
+    private void initNewRelicrReporter( MetricRegistry metrics, IndyMetricsConfig config )
+    {
+        NewRelicInsightsReporter reporter = NewRelicInsightsReporter.forRegistry( metrics )
+                                                                    .name( "New Relic Metrics" )
+                                                                    .filter( ( name, metric ) -> isApplicationMetric( name ) )
+                                                                    .rateUnit( TimeUnit.SECONDS )
+                                                                    .durationUnit( TimeUnit.MILLISECONDS )
+                                                                    .metricNamePrefix( config.getNewrelicPrefix() )
+                                                                    .build();
+
+        reporter.start( config.getNewrelicSimplePeriod(), TimeUnit.SECONDS );
+
     }
 }
