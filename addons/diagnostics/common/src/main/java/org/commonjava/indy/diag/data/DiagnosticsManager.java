@@ -77,6 +77,9 @@ public class DiagnosticsManager
 
     @Inject
     private IndyObjectMapper serializer;
+    
+    @Inject
+    private HeapDumper heapDumper;
 
     public String getThreadDumpString()
     {
@@ -175,7 +178,6 @@ public class DiagnosticsManager
                 zip.putNextEntry( new ZipEntry( THREAD_DUMP_FILE ) );
                 zip.write( getThreadDumpString().getBytes() );
                 zip.flush();
-                zip.close();
             }
         }
         else
@@ -198,6 +200,16 @@ public class DiagnosticsManager
         return out;
     }
 
+    public String getHeapDump(boolean live) {
+        return heapDumper.dumpIndyHeap( live );
+    }
+
+    /**
+     * TODO: dump the repo definitions as they exist in the StoreDataManager instead.
+     * Currently, those are the same thing, but when we move to a cluster-enabled Indy implementation we're
+     * going to need to escape the filesystem for things like repo definition storage, and use an ISPN cache
+     * or similar instead.
+     */
     private void zipRepositoryFiles( ZipOutputStream zip ) throws IOException
     {
         Set<ArtifactStore> stores = null;

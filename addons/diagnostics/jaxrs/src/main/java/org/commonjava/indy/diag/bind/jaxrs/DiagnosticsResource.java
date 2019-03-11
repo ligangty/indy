@@ -157,6 +157,7 @@ public class DiagnosticsResource
         }
     }
 
+<<<<<<< HEAD
     @ApiOperation( "Retrieve all configured logger status" )
     @ApiResponses( { @ApiResponse( code = 200, response = List.class, message = "Logger status" ),
                            @ApiResponse( code = 500, message = "Logger status can not be fetched" ) } )
@@ -252,4 +253,19 @@ public class DiagnosticsResource
 
     }
 
+    @GET
+    @Path( "/heapdump" )
+    @Produces( application_json )
+    public Response getHeapDump()
+    {
+        try
+        {
+            String file = diagnosticsManager.getHeapDump( true );
+            return Response.ok( String.format( "{\"fileName\":\"%s\"}", file ) ).build();
+        }
+        catch ( RuntimeException e )
+        {
+            throw new WebApplicationException( "Cannot get heap dump.", e );
+        }
+    }
 }
