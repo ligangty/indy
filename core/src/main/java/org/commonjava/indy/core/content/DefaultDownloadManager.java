@@ -28,7 +28,6 @@ import org.commonjava.indy.content.StoreResource;
 import org.commonjava.indy.core.change.event.IndyFileEventManager;
 import org.commonjava.indy.data.IndyDataException;
 import org.commonjava.indy.data.StoreDataManager;
-import org.commonjava.o11yphant.metrics.annotation.Measure;
 import org.commonjava.indy.model.core.ArtifactStore;
 import org.commonjava.indy.model.core.HostedRepository;
 import org.commonjava.indy.model.core.RemoteRepository;
@@ -60,6 +59,7 @@ import org.commonjava.maven.galley.model.VirtualResource;
 import org.commonjava.maven.galley.spi.io.SpecialPathManager;
 import org.commonjava.maven.galley.spi.nfc.NotFoundCache;
 import org.commonjava.maven.galley.spi.transport.LocationExpander;
+import org.commonjava.o11yphant.metrics.annotation.Measure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -632,6 +632,12 @@ public class DefaultDownloadManager
                 {
                     ( (CacheOnlyLocation) loc ).setReadonly( false );
                 }
+                else if ( !loc.allowsStoring() )
+                {
+                    logger.warn(
+                            "Storing not allowed which should not happen here! Info for storing check: repo: {}, repo's readonly: {}, readonly reset from metadata: {}",
+                            store.getKey(), loc.allowsStoring(), isIgnoreReadonly( eventMetadata ) );
+                }
                 final ConcreteResource resource = new ConcreteResource( loc, path );
 
                 Transfer txfr = transfers.store( resource, stream, eventMetadata );
@@ -713,7 +719,7 @@ public class DefaultDownloadManager
         {
             if ( !isIgnoreReadonly( eventMetadata ) && storeManager.isReadonly( store ) )
             {
-                logger.debug( "The store {} is readonly, store operation not allowed", store.getKey() );
+                logger.info( "The store {} is readonly, store operation not allowed", store.getKey() );
                 continue;
             }
             if ( storeIsSuitableFor( store, quality, op ) )
