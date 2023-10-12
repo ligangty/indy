@@ -68,15 +68,18 @@ public class ServiceStoreQuery<T extends ArtifactStore>
 
     private final CacheProducer cacheProducer;
 
+    private final Boolean doCache;
+
     private Set<StoreType> types;
 
     private Boolean enabled;
 
-    public ServiceStoreQuery( final ServiceStoreDataManager dataManager, final CacheProducer producer )
+    public ServiceStoreQuery( final ServiceStoreDataManager dataManager, final CacheProducer producer, final Boolean doCache )
     {
         logger.debug( "CREATE new default store query with data manager only" );
         this.dataManager = dataManager;
         this.cacheProducer = producer;
+        this.doCache = doCache;
         this.client = dataManager.getIndyClient();
     }
 
@@ -194,7 +197,7 @@ public class ServiceStoreQuery<T extends ArtifactStore>
                             client.module( IndyStoreQueryClientModule.class ).getGroupContaining( storeKey, "true" );
             if ( groupDTO != null )
             {
-                groups = groupDTO.getItems().stream().collect( Collectors.toSet() );
+                groups = new HashSet<>( groupDTO.getItems() );
             }
             return groups;
         }
@@ -508,26 +511,34 @@ public class ServiceStoreQuery<T extends ArtifactStore>
                                                        int expirationMins, boolean forceQuery )
     {
         logger.debug( "computeIfAbsent, cache: {}, key: {}", ARTIFACT_STORE_QUERY, key );
-
-        BasicCacheHandle<Object, Collection<ArtifactStore>> cache = cacheProducer.getBasicCache( ARTIFACT_STORE_QUERY );
-        Collection<ArtifactStore> stores = cache.get( key );
-        if ( stores == null || stores.isEmpty() || forceQuery )
+        Collection<ArtifactStore> stores;
+        if ( doCache )
         {
-            logger.trace( "Entry not found, run put, expirationMins: {}", expirationMins );
-
-            stores = storeProvider.get();
-
-            if ( stores != null && !stores.isEmpty() )
+            BasicCacheHandle<Object, Collection<ArtifactStore>> cache =
+                    cacheProducer.getBasicCache( ARTIFACT_STORE_QUERY );
+            stores = cache.get( key );
+            if ( stores == null || stores.isEmpty() || forceQuery )
             {
-                if ( expirationMins > 0 )
+                logger.trace( "Entry not found, run put, expirationMins: {}", expirationMins );
+
+                stores = storeProvider.get();
+
+                if ( stores != null && !stores.isEmpty() )
                 {
-                    cache.put( key, stores, expirationMins, TimeUnit.MINUTES );
-                }
-                else
-                {
-                    cache.put( key, stores );
+                    if ( expirationMins > 0 )
+                    {
+                        cache.put( key, stores, expirationMins, TimeUnit.MINUTES );
+                    }
+                    else
+                    {
+                        cache.put( key, stores );
+                    }
                 }
             }
+        }
+        else
+        {
+            stores = storeProvider.get();
         }
 
         logger.trace( "Return value, cache: {}, key: {}, ret: {}", ARTIFACT_STORE_QUERY, key, stores );

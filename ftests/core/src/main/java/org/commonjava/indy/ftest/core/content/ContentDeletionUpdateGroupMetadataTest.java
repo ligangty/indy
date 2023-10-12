@@ -25,11 +25,13 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -122,26 +124,27 @@ public class ContentDeletionUpdateGroupMetadataTest
 
     RemoteRepository r1, r2;
 
-    Callable<String> groupMetaCallableTask = new Callable<String>()
+    Callable<String> groupMetaCallableTask = new Callable<>()
     {
         @Override
-        public String call() throws Exception
+        public String call()
+                throws Exception
         {
             try (InputStream in = client.content().get( g.getKey(), path ))
             {
                 if ( in != null )
                 {
-                    return IOUtils.toString( in );
+                    return IOUtils.toString( in, Charset.defaultCharset() );
                 }
                 return null;
             }
         }
     };
 
-    Callable<String> deleteCallableTask = new Callable<String>()
+    Callable<String> deleteCallableTask = new Callable<>()
     {
         @Override
-        public String call() throws Exception
+        public String call()
         {
             try
             {
@@ -161,13 +164,22 @@ public class ContentDeletionUpdateGroupMetadataTest
         server.expect( server.formatUrl( repoA, path ), 200, repoAContent );
         server.expect( server.formatUrl( repoB, path ), 200, repoBContent );
 
-        r1 = new RemoteRepository( repoA, server.formatUrl( repoA ) );
-        r2 = new RemoteRepository( repoB, server.formatUrl( repoB ) );
-
-        client.stores().create( r1, "adding remote-A", RemoteRepository.class );
-        client.stores().create( r2, "adding remote-B", RemoteRepository.class );
-
-        g = client.stores().create( new Group( groupName, r1.getKey(), r2.getKey() ), "adding group", Group.class );
+        r1 = new RemoteRepository( PKG_TYPE_MAVEN, repoA, server.formatUrl( repoA ) );
+        r2 = new RemoteRepository( PKG_TYPE_MAVEN, repoB, server.formatUrl( repoB ) );
+        g = new Group( PKG_TYPE_MAVEN, groupName, r1.getKey(), r2.getKey() );
+        if ( isUseRepoService() )
+        {
+            serviceUtil.doCreateServiceRepo( r1.getKey(), serviceUtil.getStoreJson( r1 ) );
+            serviceUtil.doCreateServiceRepo( r2.getKey(), serviceUtil.getStoreJson( r2 ) );
+            serviceUtil.doCreateServiceRepo( g.getKey(), serviceUtil.getStoreJson( g ) );
+            serviceUtil.doConcreteStoreQuery( g.getKey(), r1, r2 );
+        }
+        else
+        {
+            client.stores().create( r1, "adding remote-A", RemoteRepository.class );
+            client.stores().create( r2, "adding remote-B", RemoteRepository.class );
+            g = client.stores().create( g, "adding group", Group.class );
+        }
     }
 
     @Test

@@ -54,12 +54,17 @@ public class HttpTestFixture
 
     public HttpTestFixture( final String baseResource )
     {
-        this( baseResource, null );
+        this( baseResource, 0, null );
     }
 
     public HttpTestFixture( String baseResource, TransferDecorator transferDecorator )
     {
-        server = new ExpectationServerWrapper( baseResource );
+        this( baseResource, 0, transferDecorator );
+    }
+
+    public HttpTestFixture( String baseResource, int port, TransferDecorator transferDecorator )
+    {
+        server = new ExpectationServerWrapper( baseResource, port );
 
         try
         {

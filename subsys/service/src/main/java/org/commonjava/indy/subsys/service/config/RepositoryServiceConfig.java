@@ -43,6 +43,8 @@ public class RepositoryServiceConfig
 
     private String keycloakClientSecret;
 
+    private Boolean cacheStoreData = Boolean.TRUE;
+
     public Boolean isEnabled()
     {
         return enabled;
@@ -129,6 +131,17 @@ public class RepositoryServiceConfig
     public void setKeycloakClientSecret( String keycloakClientSecret )
     {
         this.keycloakClientSecret = keycloakClientSecret;
+    }
+
+    public Boolean getCacheStoreData()
+    {
+        return cacheStoreData;
+    }
+
+    @ConfigName( "store.data.cache" )
+    public void setCacheStoreData( Boolean cacheStoreData )
+    {
+        this.cacheStoreData = cacheStoreData;
     }
 
     @Override

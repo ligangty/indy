@@ -18,6 +18,7 @@ package org.commonjava.indy.ftest.core.content;
 import org.commonjava.indy.client.core.helper.PathInfo;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.RemoteRepository;
+import org.commonjava.indy.model.core.StoreKey;
 import org.commonjava.indy.model.galley.KeyedLocation;
 import org.commonjava.indy.util.LocationUtils;
 import org.junit.Before;
@@ -25,7 +26,6 @@ import org.junit.Before;
 import java.io.File;
 import java.util.Date;
 
-import static org.commonjava.indy.model.core.StoreType.remote;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -79,14 +79,22 @@ public abstract class AbstractMetadataTimeoutWorkingTest
         // set up remote repository pointing to the test http server, and timeout little later
         final String changelog = "Timeout Testing: " + name.getMethodName();
         final RemoteRepository repository = createRemoteRepository();
+        final StoreKey remoteKey = repository.getKey();
 
         location = LocationUtils.toLocation( repository );
 
-        client.stores().create( repository, changelog, RemoteRepository.class );
+        if ( isUseRepoService() )
+        {
+            serviceUtil.doCreateServiceRepo( repository.getKey(), serviceUtil.getStoreJson( repository ) );
+        }
+        else
+        {
+            client.stores().create( repository, changelog, RemoteRepository.class );
+        }
 
         // ensure the pom exist before the timeout checking
-        final PathInfo pomResult = client.content().getInfo( remote, repoId, pomPath );
-        client.content().get( remote, repoId, pomPath ).close(); // force storage
+        final PathInfo pomResult = client.content().getInfo( remoteKey, pomPath );
+        client.content().get( remoteKey, pomPath ).close(); // force storage
         assertThat( "no pom result", pomResult, notNullValue() );
         assertThat( "pom doesn't exist", pomResult.exists(), equalTo( true ) );
 
@@ -99,8 +107,8 @@ public abstract class AbstractMetadataTimeoutWorkingTest
         assertThat( "pom doesn't exist: " + pomFile, pomFile.exists(), equalTo( true ) );
 
         // ensure the metadata exist before the timeout checking
-        final PathInfo metadataResult = client.content().getInfo( remote, repoId, metadataPath );
-        client.content().get( remote, repoId, metadataPath ).close(); // force storage
+        final PathInfo metadataResult = client.content().getInfo( remoteKey, metadataPath );
+        client.content().get( remoteKey, metadataPath ).close(); // force storage
         assertThat( "no metadata result", metadataResult, notNullValue() );
         assertThat( "metadata doesn't exist", metadataResult.exists(), equalTo( true ) );
 
@@ -113,8 +121,8 @@ public abstract class AbstractMetadataTimeoutWorkingTest
         assertThat( "metadata doesn't exist", metadataFile.exists(), equalTo( true ) );
 
         // ensure the archetype exist before the timeout checking
-        final PathInfo archetypeResult = client.content().getInfo( remote, repoId, archetypePath );
-        client.content().get( remote, repoId, archetypePath ).close(); // force storage
+        final PathInfo archetypeResult = client.content().getInfo( remoteKey, archetypePath );
+        client.content().get( remoteKey, archetypePath ).close(); // force storage
         assertThat( "no archetype result", archetypeResult, notNullValue() );
         assertThat( "archetype doesn't exist", archetypeResult.exists(), equalTo( true ) );
 
