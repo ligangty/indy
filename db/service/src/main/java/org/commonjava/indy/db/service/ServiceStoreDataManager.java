@@ -34,6 +34,7 @@ import org.commonjava.indy.model.core.StoreKey;
 import org.commonjava.indy.model.core.StoreType;
 import org.commonjava.indy.subsys.infinispan.BasicCacheHandle;
 import org.commonjava.indy.subsys.infinispan.CacheProducer;
+import org.commonjava.indy.subsys.service.config.RepositoryServiceConfig;
 import org.commonjava.indy.subsys.service.inject.ServiceClient;
 import org.commonjava.indy.util.ApplicationStatus;
 import org.commonjava.maven.galley.event.EventMetadata;
@@ -67,11 +68,14 @@ public class ServiceStoreDataManager
     private final Logger logger = LoggerFactory.getLogger( this.getClass() );
 
     @Inject
-    @ServiceClient
-    private Indy client;
+    RepositoryServiceConfig serviceConfig;
 
     @Inject
-    private CacheProducer cacheProducer;
+    @ServiceClient
+    Indy client;
+
+    @Inject
+    CacheProducer cacheProducer;
 
     private ServiceStoreQuery<ArtifactStore> serviceStoreQuery;
 
@@ -346,7 +350,7 @@ public class ServiceStoreDataManager
     @Override
     public ArtifactStoreQuery<ArtifactStore> query()
     {
-        return new ServiceStoreQuery<>( this, this.cacheProducer );
+        return new ServiceStoreQuery<>( this, this.cacheProducer, serviceConfig.getCacheStoreData() );
     }
 
     // This method is a replacement of the query() for internal usage of this class to avoid
@@ -355,7 +359,7 @@ public class ServiceStoreDataManager
     {
         if ( this.serviceStoreQuery == null )
         {
-            this.serviceStoreQuery = new ServiceStoreQuery<>( this, this.cacheProducer );
+            this.serviceStoreQuery = new ServiceStoreQuery<>( this, this.cacheProducer, serviceConfig.getCacheStoreData() );
         }
         return this.serviceStoreQuery;
     }
@@ -419,26 +423,33 @@ public class ServiceStoreDataManager
                                            boolean forceQuery )
     {
         logger.debug( "computeIfAbsent, cache: {}, key: {}", ARTIFACT_STORE, key );
-
-        BasicCacheHandle<StoreKey, ArtifactStore> cache = cacheProducer.getBasicCache( ARTIFACT_STORE );
-        ArtifactStore store = cache.get( key );
-        if ( store == null || forceQuery )
+        ArtifactStore store;
+        if ( serviceConfig.getCacheStoreData() )
         {
-            logger.trace( "Entry not found, run put, expirationMins: {}", expirationMins );
-
-            store = storeProvider.get();
-
-            if ( store != null )
+            BasicCacheHandle<StoreKey, ArtifactStore> cache = cacheProducer.getBasicCache( ARTIFACT_STORE );
+            store = cache.get( key );
+            if ( store == null || forceQuery )
             {
-                if ( expirationMins > 0 )
+                logger.trace( "Entry not found, run put, expirationMins: {}", expirationMins );
+
+                store = storeProvider.get();
+
+                if ( store != null )
                 {
-                    cache.put( key, store, expirationMins, TimeUnit.MINUTES );
-                }
-                else
-                {
-                    cache.put( key, store );
+                    if ( expirationMins > 0 )
+                    {
+                        cache.put( key, store, expirationMins, TimeUnit.MINUTES );
+                    }
+                    else
+                    {
+                        cache.put( key, store );
+                    }
                 }
             }
+        }
+        else
+        {
+            store = storeProvider.get();
         }
 
         logger.trace( "Return value, cache: {}, key: {}, ret: {}", ARTIFACT_STORE, key, store );

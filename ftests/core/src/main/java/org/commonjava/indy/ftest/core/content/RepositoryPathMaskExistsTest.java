@@ -27,8 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.commonjava.indy.model.core.StoreType.group;
-import static org.commonjava.indy.model.core.StoreType.remote;
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -52,42 +51,48 @@ public class RepositoryPathMaskExistsTest
         server.expect( server.formatUrl( repo1, path_1 ), 200, new ByteArrayInputStream( content.getBytes() ) );
         server.expect( server.formatUrl( repo1, path_2 ), 200, new ByteArrayInputStream( content.getBytes() ) );
 
-        RemoteRepository remote1 = new RemoteRepository( repo1, server.formatUrl( repo1 ) );
+        RemoteRepository remote1 = new RemoteRepository( PKG_TYPE_MAVEN, repo1, server.formatUrl( repo1 ) );
 
         Set<String> pathMaskPatterns = new HashSet<>();
         pathMaskPatterns.add("org/foo");
         remote1.setPathMaskPatterns(pathMaskPatterns);
+        Group g = new Group( PKG_TYPE_MAVEN, "test", remote1.getKey() );
 
-        remote1 = client.stores()
-                .create( remote1, "adding remote", RemoteRepository.class );
-
-        Group g = new Group( "test", remote1.getKey() );
-        g = client.stores()
-                .create( g, "adding group", Group.class );
+        if ( isUseRepoService() )
+        {
+            serviceUtil.doCreateServiceRepo( remote1.getKey(), serviceUtil.getStoreJson( remote1 ) );
+            serviceUtil.doCreateServiceRepo( g.getKey(), serviceUtil.getStoreJson( g ) );
+            serviceUtil.doConcreteStoreQuery( g.getKey(), remote1 );
+        }
+        else
+        {
+            remote1 = client.stores().create( remote1, "adding remote", RemoteRepository.class );
+            g = client.stores().create( g, "adding group", Group.class );
+        }
 
         System.out.printf( "\n\nGroup constituents are:\n  %s\n\n", StringUtils.join( g.getConstituents(), "\n  " ) );
 
         // get stream for path-1 via group (success)
         boolean result = client.content()
-                .exists( group, g.getName(), path_1 );
+                .exists( g.getKey(), path_1 );
 
         assertThat( result, equalTo( true ) );
 
         // get stream for path_2 via group (null)
         result = client.content()
-                .exists( group, g.getName(), path_2 );
+                .exists( g.getKey(), path_2 );
 
         assertThat( result, equalTo( false ) );
 
         // get stream for path_1 via concrete store (success)
         result = client.content()
-                .exists( remote, remote1.getName(), path_1 );
+                .exists( remote1.getKey(), path_1 );
 
         assertThat( result, equalTo( true ) );
 
         // get stream for path_2 via concrete repo (null)
         result = client.content()
-                .exists( remote, remote1.getName(), path_2 );
+                .exists( remote1.getKey(), path_2 );
 
         assertThat( result, equalTo( false ) );
 

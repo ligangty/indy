@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2011-2023 Red Hat, Inc. (https://github.com/Commonjava/indy)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,15 +20,19 @@ import com.fasterxml.jackson.databind.Module;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.commonjava.indy.action.IndyLifecycleException;
-import org.commonjava.indy.subsys.cassandra.CassandraClient;
-import org.commonjava.maven.galley.spi.cache.CacheProvider;
-import org.commonjava.propulsor.boot.BootStatus;
-import org.commonjava.propulsor.boot.BootException;
 import org.commonjava.indy.client.core.Indy;
 import org.commonjava.indy.client.core.IndyClientException;
 import org.commonjava.indy.client.core.IndyClientModule;
+import org.commonjava.indy.model.core.Group;
+import org.commonjava.indy.model.core.HostedRepository;
+import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.core.io.IndyObjectMapper;
+import org.commonjava.indy.subsys.cassandra.CassandraClient;
 import org.commonjava.indy.test.fixture.core.CoreServerFixture;
+import org.commonjava.maven.galley.spi.cache.CacheProvider;
+import org.commonjava.propulsor.boot.BootException;
+import org.commonjava.propulsor.boot.BootStatus;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.commonjava.util.jhttpc.model.SiteConfig;
 import org.commonjava.util.jhttpc.model.SiteConfigBuilder;
@@ -45,20 +49,22 @@ import javax.enterprise.inject.spi.CDI;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
 import static org.junit.Assert.fail;
 
+@SuppressWarnings( "ResultOfMethodCallIgnored" )
 public abstract class AbstractIndyFunctionalTest
 {
     private static final int NAME_LEN = 8;
@@ -74,6 +80,17 @@ public abstract class AbstractIndyFunctionalTest
     protected CoreServerFixture fixture;
 
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    protected static final int DEFAULT_MOCK_SERVER_PORT = 10028;
+
+    protected static final String DEFAULT_MOCK_SERVICE_URL =
+            String.format( "http://localhost:%s/api", DEFAULT_MOCK_SERVER_PORT );
+
+    @Rule
+    public ExpectationServerWrapper repoServiceServer =
+            new ExpectationServerWrapper( "api", DEFAULT_MOCK_SERVER_PORT );
+
+    protected RepoServiceUtil serviceUtil;
 
     @Rule
     public TestName name = new TestName();
@@ -92,7 +109,6 @@ public abstract class AbstractIndyFunctionalTest
 
     protected CacheProvider cacheProvider;
 
-    @SuppressWarnings( "resource" )
     @Before
     public void start()
             throws Throwable
@@ -115,6 +131,11 @@ public abstract class AbstractIndyFunctionalTest
             new Timer().scheduleAtFixedRate( task, 0, 5000 );
 
             Thread.currentThread().setName( getClass().getSimpleName() + "." + name.getMethodName() );
+            if ( isUseRepoService() )
+            {
+                logger.info( "The repo service is enabled, will start test repo service." );
+                doServiceStart();
+            }
 
             fixture = newServerFixture();
             fixture.start();
@@ -135,7 +156,22 @@ public abstract class AbstractIndyFunctionalTest
         }
     }
 
-    // Override this if your test do not access storage
+    private void doServiceStart()
+            throws Exception
+    {
+        serviceUtil = new RepoServiceUtil( repoServiceServer, DEFAULT_MOCK_SERVICE_URL );
+        final HostedRepository defaultHosted = new HostedRepository( PKG_TYPE_MAVEN, "local-deployments" );
+        serviceUtil.doCreateServiceRepo( defaultHosted.getKey(), serviceUtil.getStoreJson( defaultHosted ) );
+        final RemoteRepository defaultRemote =
+                new RemoteRepository( PKG_TYPE_MAVEN, "central", "https://repo.maven.apache.org/maven2" );
+        serviceUtil.doCreateServiceRepo( defaultRemote.getKey(), serviceUtil.getStoreJson( defaultRemote ) );
+        final Group defaultGroup = new Group( PKG_TYPE_MAVEN, "public" );
+        serviceUtil.doCreateServiceRepo( defaultGroup.getKey(),
+                                         serviceUtil.getJsonForGroupWithConstituents( defaultGroup.getKey(), defaultRemote.getKey(),
+                                                              defaultHosted.getKey() ) );
+        serviceUtil.doConcreteStoreQuery( defaultGroup.getKey(), defaultRemote, defaultHosted );
+    }
+
     protected boolean isPathMappedStorageEnabled()
     {
         return true;
@@ -167,7 +203,7 @@ public abstract class AbstractIndyFunctionalTest
 
     protected void waitForEventPropagationWithMultiplier( int multiplier )
     {
-        long ms = 1000 * multiplier;
+        long ms = 1000L * multiplier;
 
         Logger logger = LoggerFactory.getLogger( getClass() );
         logger.info( "Waiting {}ms for Indy server events to clear.", ms );
@@ -233,7 +269,7 @@ public abstract class AbstractIndyFunctionalTest
             }
             catch ( Exception ex )
             {
-                logger.warn( "Failed to drop keyspace: {}, reason: {}", keyspace, ex );
+                logger.warn( "Failed to drop keyspace: {}, reason: {}", keyspace, ex.getMessage() );
             }
         }
     }
@@ -290,6 +326,10 @@ public abstract class AbstractIndyFunctionalTest
         writeConfigFile( "conf.d/default.conf", "[default]\ncache.keyspace=" + getKeyspace( "cache_" )
                 + "\naffected.groups.exclude=^build-\\d+"
                 + "\nrepository.filter.enabled=true\nga-cache.store.pattern=^build-\\d+" );
+        if ( isUseRepoService() )
+        {
+            writeConfigFile( "conf.d/default.conf", "\nstore.management.rest.enabled=false", true );
+        }
         writeConfigFile( "conf.d/storage.conf",
                          "[storage-default]\n" + "storage.dir=" + fixture.getBootOptions().getHomeDir()
                                  + "/var/lib/indy/storage\n" + "storage.gc.graceperiodinhours=0\n"
@@ -328,6 +368,15 @@ public abstract class AbstractIndyFunctionalTest
         {
             writeConfigFile( "conf.d/scheduler.conf", "[scheduler]\nenabled=false" );
         }
+
+        if ( isUseRepoService() )
+        {
+            logger.info( "The repo service is enabled, will use service based store management." );
+            writeConfigFile( "conf.d/durable-state.conf",
+                             "[durable-state]\n" + "folo.storage=infinispan\n" + "store.storage=service\n"
+                                     + "schedule.storage=infinispan" );
+            writeConfigFile( "conf.d/repo-service.conf", readTestResource( "default-test-repo-service.conf" ) );
+        }
     }
 
     private String getKeyspace( String prefix )
@@ -345,10 +394,15 @@ public abstract class AbstractIndyFunctionalTest
         return true;
     }
 
+    protected boolean isUseRepoService()
+    {
+        return true;
+    }
+
     protected String readTestResource( String resource )
             throws IOException
     {
-        return IOUtils.toString( readTestResourceAsStream( resource ) );
+        return IOUtils.toString( readTestResourceAsStream( resource ), Charset.defaultCharset() );
     }
 
     protected InputStream readTestResourceAsStream( String resource )
@@ -360,23 +414,46 @@ public abstract class AbstractIndyFunctionalTest
     protected void writeConfigFile( String confPath, String contents )
             throws IOException
     {
+        writeConfigFile( confPath, contents, false );
+    }
+
+    protected void writeConfigFile( String confPath, String contents, boolean append )
+            throws IOException
+    {
         File confFile = new File( etcDir, confPath );
-        logger.info( "Writing configuration to: {}\n\n{}\n\n", confFile, contents );
-
-        confFile.getParentFile().mkdirs();
-
-        FileUtils.write( confFile, contents );
+        if ( !confFile.exists() || !append )
+        {
+            logger.info( "Writing configuration to: {}\n\n{}\n\n", confFile, contents );
+            confFile.getParentFile().mkdirs();
+            FileUtils.write( confFile, contents, Charset.defaultCharset(), false );
+        }
+        else
+        {
+            FileUtils.write( confFile, contents, Charset.defaultCharset(), true );
+        }
     }
 
     protected void writeDataFile( String path, String contents )
             throws IOException
     {
+        writeDataFile( path, contents, false );
+    }
+
+    protected void writeDataFile( String path, String contents, boolean append )
+            throws IOException
+    {
         File file = new File( dataDir, path );
 
-        logger.info( "Writing data file to: {}\n\n{}\n\n", file, contents );
-        file.getParentFile().mkdirs();
-
-        FileUtils.write( file, contents );
+        if ( !file.exists() || !append )
+        {
+            logger.info( "Writing data file to: {}\n\n{}\n\n", file, contents );
+            file.getParentFile().mkdirs();
+            FileUtils.write( file, contents, Charset.defaultCharset(), false );
+        }
+        else
+        {
+            FileUtils.write( file, contents, Charset.defaultCharset(), true );
+        }
     }
 
     protected void copyToDataFile( String resourcePath, String path )
@@ -433,7 +510,7 @@ public abstract class AbstractIndyFunctionalTest
 
     protected boolean isEmpty( String val )
     {
-        return val == null || val.length() < 1;
+        return val == null || val.isEmpty();
     }
 
 }

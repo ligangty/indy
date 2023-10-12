@@ -49,6 +49,8 @@ public class RepositoryServiceConfig
     // to the current time when checking if the authorization token should be refreshed.
     private long refreshTokenTimeSkew = DEFAULT_REFRESH_TOKEN_TIME_SKEW;
 
+    private Boolean cacheStoreData = Boolean.TRUE;
+
     public Boolean isEnabled()
     {
         return enabled;
@@ -143,9 +145,20 @@ public class RepositoryServiceConfig
     }
 
     @ConfigName( "keycloak.auth.refresh-token-time-skew" )
-    public void setRefreshTokenTimeSkew(long refreshTokenTimeSkew)
+    public void setRefreshTokenTimeSkew( long refreshTokenTimeSkew )
     {
         this.refreshTokenTimeSkew = refreshTokenTimeSkew;
+    }
+
+    public Boolean getCacheStoreData()
+    {
+        return cacheStoreData;
+    }
+
+    @ConfigName( "store.data.cache" )
+    public void setCacheStoreData( Boolean cacheStoreData )
+    {
+        this.cacheStoreData = cacheStoreData;
     }
 
     @Override

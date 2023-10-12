@@ -18,11 +18,14 @@ package org.commonjava.indy.ftest.core.content;
 import org.commonjava.indy.ftest.core.category.EventDependent;
 import org.commonjava.indy.ftest.core.category.TimingDependent;
 import org.commonjava.indy.model.core.RemoteRepository;
+import org.commonjava.indy.pkg.PackageTypeConstants;
 import org.commonjava.indy.test.fixture.core.CoreServerFixture;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
+
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
 
 public class ContentPassthroughTimeoutWorkingTest
         extends AbstractContentTimeoutWorkingTest
@@ -46,7 +49,7 @@ public class ContentPassthroughTimeoutWorkingTest
     @Override
     protected RemoteRepository createRemoteRepository( String repoId )
     {
-        final RemoteRepository repository = new RemoteRepository( repoId, server.formatUrl( repoId ) );
+        final RemoteRepository repository = new RemoteRepository( PKG_TYPE_MAVEN, repoId, server.formatUrl( repoId ) );
         repository.setPassthrough( true );
         return repository;
     }

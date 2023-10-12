@@ -18,8 +18,11 @@ package org.commonjava.indy.ftest.core.content;
 import org.commonjava.indy.ftest.core.category.EventDependent;
 import org.commonjava.indy.ftest.core.category.TimingDependent;
 import org.commonjava.indy.model.core.RemoteRepository;
+import org.commonjava.indy.pkg.PackageTypeConstants;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
 
 public class ContentTimeoutWorkingTest
         extends AbstractContentTimeoutWorkingTest
@@ -35,7 +38,7 @@ public class ContentTimeoutWorkingTest
     @Override
     protected RemoteRepository createRemoteRepository( String repoId )
     {
-        final RemoteRepository repository = new RemoteRepository( repoId, server.formatUrl( repoId ) );
+        final RemoteRepository repository = new RemoteRepository( PKG_TYPE_MAVEN, repoId, server.formatUrl( repoId ) );
         repository.setCacheTimeoutSeconds( TIMEOUT_SECONDS );
         return repository;
     }

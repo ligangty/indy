@@ -18,6 +18,7 @@ package org.commonjava.indy.ftest.core.content;
 import org.commonjava.indy.client.core.helper.PathInfo;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.RemoteRepository;
+import org.commonjava.indy.model.core.StoreKey;
 import org.commonjava.indy.model.galley.KeyedLocation;
 import org.commonjava.indy.util.LocationUtils;
 import org.junit.Before;
@@ -25,7 +26,6 @@ import org.junit.Before;
 import java.io.File;
 import java.util.Date;
 
-import static org.commonjava.indy.model.core.StoreType.remote;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,6 +59,7 @@ public abstract class AbstractContentTimeoutWorkingTest
         final String repoId = "test-repo";
         final String pomPath = "org/foo/bar/1.0/bar-1.0.pom";
         final String pomUrl = server.formatUrl( repoId, pomPath );
+        final StoreKey remoteStoreKey = StoreKey.fromString( "maven:remote:" + repoId );
 
         // mocking up a http server that expects access to a .pom
         final String datetime = ( new Date() ).toString();
@@ -67,17 +68,22 @@ public abstract class AbstractContentTimeoutWorkingTest
         // set up remote repository pointing to the test http server, and timeout little later
         final String changelog = "Timeout Testing: " + name.getMethodName();
         final RemoteRepository repository = createRemoteRepository( repoId );
-
         location = LocationUtils.toLocation( repository );
-
-        client.stores().create( repository, changelog, RemoteRepository.class );
+        if ( isUseRepoService() )
+        {
+            serviceUtil.doCreateServiceRepo( remoteStoreKey, serviceUtil.getStoreJson( repository ) );
+        }
+        else
+        {
+            client.stores().create( repository, changelog, RemoteRepository.class );
+        }
 
         // ensure the pom exist before the timeout checking
-        final PathInfo result = client.content().getInfo( remote, repoId, pomPath );
+        final PathInfo result = client.content().getInfo( remoteStoreKey, pomPath );
         assertThat( "no result", result, notNullValue() );
         assertThat( "doesn't exist", result.exists(), equalTo( true ) );
 
-        client.content().get(remote, repoId, pomPath).close(); // force storage
+        client.content().get( remoteStoreKey, pomPath ).close(); // force storage
 
         pomFile = getPhysicalStorageFile( location, pomPath );
 /*
@@ -94,7 +100,7 @@ public abstract class AbstractContentTimeoutWorkingTest
             throws Exception
     {
         // make sure the repo timeout
-        sleepAndRunFileGC( getTestTimeoutMultiplier() * TIMEOUT_WAITING_MILLISECONDS );
+        sleepAndRunFileGC( (long) getTestTimeoutMultiplier() * TIMEOUT_WAITING_MILLISECONDS );
         logger.debug( "Timeout time {}s passed!", TIMEOUT_SECONDS );
 
         assertThat( "artifact should be removed when timeout", pomFile.exists(), equalTo( false ) );

@@ -19,12 +19,15 @@ import org.apache.commons.io.IOUtils;
 import org.commonjava.indy.ftest.core.AbstractIndyFunctionalTest;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.RemoteRepository;
+import org.commonjava.indy.pkg.PackageTypeConstants;
 import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -65,19 +68,35 @@ public class ContentNotAvailableInGroupWithDisabledRemoteTest
 
         server.expect( server.formatUrl( remoteName, path ), 200, content );
 
-        RemoteRepository r = new RemoteRepository( remoteName, server.formatUrl( remoteName ) );
-        r = client.stores().create( r, "adding remote", RemoteRepository.class );
-
-        Group g = new Group( groupName, r.getKey() );
-        g = client.stores().create( g, "adding group", Group.class );
+        RemoteRepository r = new RemoteRepository( PKG_TYPE_MAVEN, remoteName, server.formatUrl( remoteName ) );
+        Group g = new Group( PKG_TYPE_MAVEN, groupName, r.getKey() );
+        if ( isUseRepoService() )
+        {
+            serviceUtil.doUpdateServiceRepo( r.getKey(), serviceUtil.getStoreJson( r ) );
+            serviceUtil.doUpdateServiceRepo( g.getKey(), serviceUtil.getStoreJson( g ) );
+            serviceUtil.doConcreteStoreQuery( g.getKey(), r );
+        }
+        else
+        {
+            r = client.stores().create( r, "adding remote", RemoteRepository.class );
+            g = client.stores().create( g, "adding group", Group.class );
+        }
 
         try (InputStream in = client.content().get( g.getKey(), path ))
         {
-            assertThat( IOUtils.toString( in ), equalTo( content ) );
+            assertThat( IOUtils.toString( in, Charset.defaultCharset() ), equalTo( content ) );
         }
 
         r.setDisabled( true );
-        client.stores().update( r, "adding remote" );
+        if ( isUseRepoService() )
+        {
+            serviceUtil.doUpdateServiceRepo( r.getKey(), serviceUtil.getStoreJson( r ) );
+            serviceUtil.clearConcreteStoreQuery( g.getKey() );
+        }
+        else
+        {
+            client.stores().update( r, "adding remote" );
+        }
 
         assertThat( client.content().exists( g.getKey(), path ), equalTo( false ) );
     }

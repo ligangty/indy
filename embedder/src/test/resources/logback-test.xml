@@ -50,6 +50,7 @@
   <logger name="io.netty" level="WARN"/>
   <logger name="com.datastax" level="WARN" />
   <logger name="org.apache.http" level="WARN"/>
+  <logger name="org.apache.kafka" level="WARN" />
   <logger name="org.jboss.weld" level="ERROR"/>
   <logger name="org.apache.kafka" level="ERROR"/>
 
@@ -63,7 +64,9 @@
   <logger name="org.commonjava.indy.model.core.StoreKey" level="INFO" />
   <logger name="org.commonjava.indy.pkg.npm.content.NPMStoragePathCalculator" level="INFO" />
   <logger name="org.commonjava.indy.subsys.metrics" level="INFO" />
-  <logger name="org.commonjava.o11yphant.metrics" level="INFO" />
+  <logger name="org.commonjava.o11yphant" level="INFO" />
+  <logger name="org.commonjava.indy.httprox.metrics" level="WARN" />
+  <logger name="org.commonjava.indy.client.core.metric" level="WARN" />
 
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />

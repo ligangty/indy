@@ -15,23 +15,6 @@
  */
 package org.commonjava.indy.ftest.core;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.commonjava.indy.model.core.StoreType.group;
-import static org.commonjava.indy.model.core.StoreType.remote;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Paths;
-import java.util.Arrays;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
@@ -49,8 +32,28 @@ import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Before;
 import org.junit.Rule;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.util.Arrays;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.commonjava.indy.model.core.StoreKey.fromString;
+import static org.commonjava.indy.pkg.PackageTypeConstants.PKG_TYPE_MAVEN;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+@SuppressWarnings( "SameParameterValue" )
 public class AbstractContentManagementTest
-    extends AbstractIndyFunctionalTest
+        extends AbstractIndyFunctionalTest
 {
 
     protected static final String NFS_BASE = "/mnt/nfs/var/lib/indy/storage";
@@ -75,46 +78,70 @@ public class AbstractContentManagementTest
 
     @Before
     public void before()
-        throws Exception
+            throws Throwable
     {
         if ( !createStandardTestStructures() )
         {
             return;
         }
+        if ( isUseRepoService() )
+        {
+            doServiceStart();
+        }
+        else
+        {
+            doStandaloneStart();
+        }
+    }
+
+    private void doStandaloneStart()
+            throws Exception
+    {
 
         final String changelog = "Create test structures";
 
-        final HostedRepository hosted =
-            this.client.stores()
-                       .create( new HostedRepository( STORE ), changelog, HostedRepository.class );
+        final HostedRepository hosted = this.client.stores()
+                                                   .create( new HostedRepository( PKG_TYPE_MAVEN, STORE ), changelog,
+                                                            HostedRepository.class );
 
-        client.stores()
-              .delete( remote, CENTRAL, "removing to setup test instance" );
+        client.stores().delete( fromString( "maven:remote:central" ), "removing to setup test instance" );
 
-        final RemoteRepository central =
-            client.stores()
-                      .create( new RemoteRepository( CENTRAL, server.formatUrl( "central" ) ), changelog,
-                               RemoteRepository.class );
-
+        final RemoteRepository central = client.stores()
+                                               .create( new RemoteRepository( PKG_TYPE_MAVEN, CENTRAL,
+                                                                              server.formatUrl( "central" ) ),
+                                                        changelog, RemoteRepository.class );
+        final StoreKey groupPubKey = fromString( "maven:group:public" );
         Group g;
-        if ( client.stores()
-                   .exists( group, PUBLIC ) )
+        if ( client.stores().exists( groupPubKey ) )
         {
             System.out.println( "Loading pre-existing public group." );
-            g = client.stores()
-                      .load( group, PUBLIC, Group.class );
+            g = client.stores().load( groupPubKey, Group.class );
         }
         else
         {
             System.out.println( "Creating new group 'public'" );
-            g = client.stores()
-                      .create( new Group( PUBLIC ), changelog, Group.class );
+            g = client.stores().create( new Group( PKG_TYPE_MAVEN, PUBLIC ), changelog, Group.class );
         }
 
         g.setConstituents( Arrays.asList( hosted.getKey(), central.getKey() ) );
-        client.stores()
-              .update( g, changelog );
+        client.stores().update( g, changelog );
     }
+
+    private void doServiceStart()
+            throws Exception
+    {
+        final StoreKey hosted = fromString( format( "maven:hosted:%s", STORE ) );
+        serviceUtil.doCreateServiceRepo( hosted,
+                                         serviceUtil.getStoreJson( new HostedRepository( hosted.getPackageType(), hosted.getName() ) ) );
+        final StoreKey remote = fromString( "maven:remote:central" );
+        serviceUtil.doDeleteServiceRepo( remote );
+        serviceUtil.doCreateServiceRepo( fromString( "maven:remote:central" ), serviceUtil.getStoreJson( new RemoteRepository( remote.getPackageType(), remote.getName(),
+                                                                                                       server.formatUrl( remote.getName() ) ) ) );
+        final StoreKey group = fromString( "maven:group:public" );
+        serviceUtil.doCreateServiceRepo( group, serviceUtil.getJsonForGroupWithConstituents( group, remote, hosted ) );
+    }
+
+
 
     protected boolean createStandardTestStructures()
     {
@@ -151,11 +178,11 @@ public class AbstractContentManagementTest
     protected String assertContent( ArtifactStore store, String path, String expected )
             throws IndyClientException, IOException
     {
-        try(InputStream in = client.content().get( store.getKey(), path))
+        try (InputStream in = client.content().get( store.getKey(), path ))
         {
             assertThat( "Content not found: " + path + " in store: " + store.getKey(), in, notNullValue() );
 
-            String foundContent = IOUtils.toString( in );
+            String foundContent = IOUtils.toString( in, Charset.defaultCharset() );
             logger.info(
                     "Checking content result from path: {} in store: {} with value:\n\n{}\n\nagainst expected value:\n\n{}",
                     path, store.getKey(), foundContent, expected );
@@ -170,13 +197,13 @@ public class AbstractContentManagementTest
     protected void assertNullContent( ArtifactStore store, String path )
             throws IndyClientException, IOException
     {
-        try(InputStream in = client.content().get( store.getKey(), path))
+        try (InputStream in = client.content().get( store.getKey(), path ))
         {
             assertThat( "Content found: " + path + " in store: " + store.getKey(), in, nullValue() );
         }
     }
 
-    protected String getRealLastUpdated ( StoreKey key, String path )
+    protected String getRealLastUpdated( StoreKey key, String path )
             throws Exception
     {
         InputStream meta = client.content().get( key, path );
@@ -193,20 +220,22 @@ public class AbstractContentManagementTest
                       new ByteArrayInputStream( template.replaceAll( "%version%", version ).getBytes() ) );
     }
 
+    @SuppressWarnings( "UnusedReturnValue" )
     protected String assertMetadataContent( ArtifactStore store, String path, String expected )
-                    throws IndyClientException, IOException
+            throws IndyClientException, IOException
     {
         try (InputStream in = client.content().get( store.getKey(), path ))
         {
             assertThat( "Content not found: " + path + " in store: " + store.getKey(), in, notNullValue() );
 
-            String foundContent = IOUtils.toString( in );
+            String foundContent = IOUtils.toString( in, Charset.defaultCharset() );
 
             foundContent = groom( foundContent );
             expected = groom( expected );
 
-            logger.info( "Checking content result from path: {} in store: {} with value:\n\n{}\n\nagainst expected value:\n\n{}",
-                         path, store.getKey(), foundContent, expected );
+            logger.info(
+                    "Checking content result from path: {} in store: {} with value:\n\n{}\n\nagainst expected value:\n\n{}",
+                    path, store.getKey(), foundContent, expected );
 
             assertThat( "Content is wrong: " + path + " in store: " + store.getKey(), foundContent,
                         equalTo( expected ) );
@@ -218,14 +247,15 @@ public class AbstractContentManagementTest
     /**
      * Normalize xml, ignore the lastUpdated, sort the versioning release/latest, etc
      */
-    private String groom( String metadataXML ) throws IOException
+    private String groom( String metadataXML )
+            throws IOException
     {
         String release = null;
         String latest = null;
 
         StringBuilder sb = new StringBuilder();
-        BufferedReader reader = new BufferedReader(
-                        new InputStreamReader( new ByteArrayInputStream( metadataXML.getBytes() ) ) );
+        BufferedReader reader =
+                new BufferedReader( new InputStreamReader( new ByteArrayInputStream( metadataXML.getBytes() ) ) );
         while ( reader.ready() )
         {
             String line = reader.readLine();
@@ -235,7 +265,7 @@ public class AbstractContentManagementTest
             }
             else if ( line.contains( "<lastUpdated>" ) || line.contains( "<updated>" ) )
             {
-                ; // skip
+                // do nothing
             }
             else if ( line.contains( "<release>" ) )
             {
@@ -251,11 +281,11 @@ public class AbstractContentManagementTest
                 {
                     if ( isNotBlank( release ) )
                     {
-                        sb.append( release + "\n" );
+                        sb.append( release ).append( "\n" );
                     }
-                    sb.append( latest + "\n" );
+                    sb.append( latest ).append( "\n" );
                 }
-                sb.append( line + "\n" );
+                sb.append( line ).append( "\n" );
             }
         }
         reader.close();
