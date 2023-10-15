@@ -22,8 +22,6 @@ import org.commonjava.indy.client.core.helper.PathInfo;
 import org.commonjava.indy.client.core.module.IndyRawHttpModule;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -40,9 +38,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DownloadContentHasLengthHeaderTest
         extends AbstractContentManagementTest
 {
-
-    @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
 
     @Override
     protected boolean createStandardTestStructures()

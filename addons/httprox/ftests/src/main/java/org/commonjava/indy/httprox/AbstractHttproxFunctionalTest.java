@@ -15,12 +15,6 @@
  */
 package org.commonjava.indy.httprox;
 
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -34,15 +28,21 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.commonjava.propulsor.boot.PortFinder;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.indy.ftest.core.AbstractIndyFunctionalTest;
 import org.commonjava.indy.test.fixture.core.CoreServerFixture;
-import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.galley.maven.parse.PomPeek;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.propulsor.boot.PortFinder;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+import static org.junit.Assert.fail;
 
 public class AbstractHttproxFunctionalTest
     extends AbstractIndyFunctionalTest
@@ -55,7 +55,7 @@ public class AbstractHttproxFunctionalTest
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     protected int proxyPort;
 

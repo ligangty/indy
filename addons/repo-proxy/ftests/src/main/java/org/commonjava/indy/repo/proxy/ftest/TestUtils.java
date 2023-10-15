@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.indy.content.browse.model.ContentBrowseResult;
 import org.commonjava.indy.model.core.AbstractRepository;
 import org.commonjava.maven.galley.util.PathUtils;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -28,8 +28,8 @@ import java.util.Set;
 
 public class TestUtils
 {
-    static String getExpectedRemoteContent( ExpectationServer server, AbstractRepository repo, String rootPath,
-                                     ObjectMapper mapper )
+    static String getExpectedRemoteContent( ExpectationServerWrapper server, AbstractRepository repo, String rootPath,
+                                            ObjectMapper mapper )
             throws IOException
     {
         final String url = server.formatUrl( "" );

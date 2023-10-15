@@ -15,20 +15,19 @@
  */
 package org.commonjava.indy.folo.ftest.content;
 
+import org.commonjava.indy.folo.client.IndyFoloContentClientModule;
+import org.commonjava.indy.model.core.RemoteRepository;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
+import org.junit.Rule;
+import org.junit.Test;
+
+import java.io.InputStream;
+import java.util.Date;
+
 import static org.commonjava.indy.model.core.StoreType.remote;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.Date;
-
-import org.commonjava.indy.folo.client.IndyFoloContentClientModule;
-import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
-import org.junit.Rule;
-import org.junit.Test;
 
 /**
  * Test checking that a pom is downloaded automatically without requesting it. The test runs an http server that expects
@@ -42,7 +41,7 @@ public class AutomaticPomDownloadTest
 {
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Test
     public void downloadJarAndCheckIfPomWasDownloaded()

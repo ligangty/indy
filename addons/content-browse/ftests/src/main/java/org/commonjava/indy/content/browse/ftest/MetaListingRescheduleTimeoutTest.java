@@ -15,7 +15,6 @@
  */
 package org.commonjava.indy.content.browse.ftest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.commonjava.indy.client.core.IndyClientModule;
 import org.commonjava.indy.content.browse.client.IndyContentBrowseClientModule;
 import org.commonjava.indy.content.browse.model.ContentBrowseResult;
@@ -26,7 +25,7 @@ import org.commonjava.indy.model.galley.KeyedLocation;
 import org.commonjava.indy.pkg.maven.model.MavenPackageTypeDescriptor;
 import org.commonjava.indy.test.fixture.core.CoreServerFixture;
 import org.commonjava.indy.util.LocationUtils;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -34,13 +33,10 @@ import org.junit.experimental.categories.Category;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-import static org.commonjava.indy.model.core.StoreType.remote;
-import static org.commonjava.indy.pkg.maven.model.MavenPackageTypeDescriptor.MAVEN_PKG_KEY;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,7 +60,7 @@ public class MetaListingRescheduleTimeoutTest
 {
 
     @Rule
-    public ExpectationServer server = new ExpectationServer(  );
+    public ExpectationServerWrapper server = new ExpectationServerWrapper(  );
 
     //    @Ignore // content listing is disabled for now, 2018/4/3
     @Test

@@ -18,7 +18,7 @@ package org.commonjava.indy.pkg.maven.content;
 import org.apache.commons.io.IOUtils;
 import org.commonjava.indy.ftest.core.AbstractIndyFunctionalTest;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class HugeMetadataDownloadTest
         extends AbstractIndyFunctionalTest
 {
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Test
     public void run()

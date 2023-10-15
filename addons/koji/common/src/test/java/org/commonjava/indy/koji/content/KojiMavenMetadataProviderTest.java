@@ -20,6 +20,7 @@ import com.redhat.red.build.koji.KojiClientException;
 import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Writer;
+import org.commonjava.atlas.maven.ident.ref.ProjectRef;
 import org.commonjava.cdi.util.weft.PoolWeftExecutorService;
 import org.commonjava.cdi.util.weft.WeftExecutorService;
 import org.commonjava.indy.audit.ChangeSummary;
@@ -38,7 +39,6 @@ import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.core.StoreKey;
 import org.commonjava.indy.model.core.io.IndyObjectMapper;
 import org.commonjava.indy.subsys.infinispan.CacheHandle;
-import org.commonjava.atlas.maven.ident.ref.ProjectRef;
 import org.commonjava.maven.galley.GalleyCore;
 import org.commonjava.maven.galley.GalleyCoreBuilder;
 import org.commonjava.maven.galley.GalleyInitException;
@@ -49,7 +49,7 @@ import org.commonjava.maven.galley.maven.internal.type.StandardTypeMapper;
 import org.commonjava.maven.galley.transport.htcli.HttpClientTransport;
 import org.commonjava.maven.galley.transport.htcli.HttpImpl;
 import org.commonjava.maven.galley.transport.htcli.conf.GlobalHttpConfiguration;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.commonjava.util.jhttpc.auth.MemoryPasswordManager;
 import org.hamcrest.CoreMatchers;
 import org.infinispan.Cache;
@@ -99,7 +99,7 @@ public class KojiMavenMetadataProviderTest
     public TestName named = new TestName();
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     private CacheHandle<ProjectRef, Metadata> cache;
 

@@ -21,7 +21,7 @@ import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.HostedRepository;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -30,8 +30,10 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.commonjava.indy.model.core.StoreType.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.commonjava.indy.model.core.StoreType.group;
+import static org.commonjava.indy.model.core.StoreType.hosted;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RepositoryPathMaskExtTest
@@ -39,7 +41,7 @@ public class RepositoryPathMaskExtTest
 {
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     /**
      * Extensive tests. Both regex patterns and "directory prefix" patterns need to be tested, involving all three store types:

@@ -30,6 +30,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.cdi.util.weft.PoolWeftExecutorService;
 import org.commonjava.cdi.util.weft.WeftExecutorService;
 import org.commonjava.indy.bind.jaxrs.MDCManager;
@@ -56,16 +57,15 @@ import org.commonjava.indy.model.core.StoreType;
 import org.commonjava.indy.model.core.io.IndyObjectMapper;
 import org.commonjava.indy.subsys.datafile.DataFileManager;
 import org.commonjava.indy.subsys.datafile.change.DataFileEventManager;
-import org.commonjava.indy.subsys.trace.config.IndyTraceConfiguration;
 import org.commonjava.indy.subsys.infinispan.CacheHandle;
 import org.commonjava.indy.subsys.infinispan.CacheProducer;
 import org.commonjava.indy.subsys.keycloak.conf.KeycloakConfig;
 import org.commonjava.indy.subsys.template.ScriptEngine;
 import org.commonjava.indy.subsys.template.TemplatingEngine;
+import org.commonjava.indy.subsys.trace.config.IndyTraceConfiguration;
 import org.commonjava.indy.test.fixture.core.MockContentAdvisor;
 import org.commonjava.indy.test.fixture.core.MockInstance;
 import org.commonjava.indy.util.MimeTyper;
-import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.galley.auth.MemoryPasswordManager;
 import org.commonjava.maven.galley.io.SpecialPathManagerImpl;
 import org.commonjava.maven.galley.io.checksum.TransferMetadata;
@@ -81,7 +81,7 @@ import org.commonjava.o11yphant.otel.OtelTracePlugin;
 import org.commonjava.o11yphant.trace.SpanFieldsDecorator;
 import org.commonjava.o11yphant.trace.TraceManager;
 import org.commonjava.propulsor.boot.BootOptions;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
@@ -120,7 +120,7 @@ public class HttpProxyTest
     protected final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Rule
     public TemporaryFolder temp = new TemporaryFolder();

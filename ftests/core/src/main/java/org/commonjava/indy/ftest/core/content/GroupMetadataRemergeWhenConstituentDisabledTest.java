@@ -21,7 +21,7 @@ import org.commonjava.indy.client.core.IndyClientException;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,8 +30,8 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.commonjava.indy.model.core.StoreType.group;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
@@ -61,7 +61,7 @@ public class GroupMetadataRemergeWhenConstituentDisabledTest
 {
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Test
     public void run()

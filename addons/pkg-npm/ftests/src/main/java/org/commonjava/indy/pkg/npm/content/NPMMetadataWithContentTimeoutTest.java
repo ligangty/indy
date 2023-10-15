@@ -22,8 +22,6 @@ import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.pkg.PackageTypeConstants;
 import org.commonjava.indy.util.LocationUtils;
 import org.commonjava.maven.galley.model.Location;
-import org.commonjava.test.http.expect.ExpectationServer;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -50,9 +48,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class NPMMetadataWithContentTimeoutTest
         extends AbstractContentManagementTest
 {
-    @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
-
     @Test
     @Category( TimingDependent.class )
     public void timeout()

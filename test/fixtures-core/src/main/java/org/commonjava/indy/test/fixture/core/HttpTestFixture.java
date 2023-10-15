@@ -15,15 +15,6 @@
  */
 package org.commonjava.indy.test.fixture.core;
 
-import static org.commonjava.indy.subsys.http.conf.IndyHttpConfig.DEFAULT_SITE;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Map;
-
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -36,9 +27,18 @@ import org.commonjava.maven.galley.model.ConcreteResource;
 import org.commonjava.maven.galley.model.Transfer;
 import org.commonjava.maven.galley.spi.io.TransferDecorator;
 import org.commonjava.test.http.expect.ContentResponse;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TemporaryFolder;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Map;
+
+import static org.commonjava.indy.subsys.http.conf.IndyHttpConfig.DEFAULT_SITE;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class HttpTestFixture
     extends ExternalResource
@@ -46,7 +46,7 @@ public class HttpTestFixture
 
     public TemporaryFolder folder = new TemporaryFolder();
 
-    public ExpectationServer server;
+    public ExpectationServerWrapper server;
 
     private final IndyHttpProvider http;
 
@@ -59,7 +59,7 @@ public class HttpTestFixture
 
     public HttpTestFixture( String baseResource, TransferDecorator transferDecorator )
     {
-        server = new ExpectationServer( baseResource );
+        server = new ExpectationServerWrapper( baseResource );
 
         try
         {
@@ -96,7 +96,7 @@ public class HttpTestFixture
         return folder;
     }
 
-    public ExpectationServer getServer()
+    public ExpectationServerWrapper getServer()
     {
         return server;
     }

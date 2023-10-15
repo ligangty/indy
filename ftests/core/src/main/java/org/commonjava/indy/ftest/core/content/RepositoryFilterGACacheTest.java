@@ -29,7 +29,7 @@ import org.commonjava.indy.model.core.StoreKey;
 import org.commonjava.indy.pathmapped.cache.PathMappedMavenGACache;
 import org.commonjava.indy.pathmapped.inject.PathMappedGroupRepositoryFilter;
 import org.commonjava.indy.pathmapped.inject.PathMappedMavenGACacheGroupRepositoryFilter;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -131,7 +131,7 @@ public class RepositoryFilterGACacheTest
     private final String V2_2 = "2.0-bluehat-2";
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     /* @formatter:off */
     private static final String POM_TEMPLATE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

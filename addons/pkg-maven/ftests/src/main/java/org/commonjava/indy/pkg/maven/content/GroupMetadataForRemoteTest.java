@@ -19,7 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.commonjava.indy.ftest.core.AbstractIndyFunctionalTest;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -60,7 +60,7 @@ public class GroupMetadataForRemoteTest
                 extends AbstractIndyFunctionalTest
 {
     @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
+    public ExpectationServerWrapper server = new ExpectationServerWrapper( "repos" );
 
     private final String REMOTE = "remote-A";
 

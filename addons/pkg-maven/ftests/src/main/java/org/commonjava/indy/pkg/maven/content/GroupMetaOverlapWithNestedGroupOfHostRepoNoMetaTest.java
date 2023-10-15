@@ -23,7 +23,7 @@ import org.commonjava.indy.ftest.core.category.EventDependent;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.HostedRepository;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class GroupMetaOverlapWithNestedGroupOfHostRepoNoMetaTest
         extends AbstractContentManagementTest
 {
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Test
     @Ignore( "Due to the new way of metadata merging with cache, this case does not apply to that and should be considered as not suitable now. See MetadataMergeListener for the new logic")

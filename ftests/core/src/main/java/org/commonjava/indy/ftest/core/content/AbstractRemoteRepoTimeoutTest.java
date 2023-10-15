@@ -19,21 +19,14 @@ import org.apache.http.HttpStatus;
 import org.commonjava.indy.client.core.IndyClientException;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.indy.model.core.StoreKey;
-import org.commonjava.maven.galley.model.Location;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Rule;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.rmi.Remote;
-import java.util.Date;
-import java.util.Map;
 
 import static org.commonjava.indy.model.core.StoreType.remote;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -61,7 +54,7 @@ public abstract class AbstractRemoteRepoTimeoutTest extends AbstractContentManag
     }
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     public void run()
             throws Exception

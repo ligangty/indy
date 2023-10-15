@@ -24,7 +24,7 @@ import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.HostedRepository;
 import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.core.StoreKey;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.experimental.categories.Category;
@@ -48,7 +48,7 @@ public class AbstractNPMFoloContentManagementTest
     protected static final String PUBLIC = "public";
 
     @Rule
-    public ExpectationServer npmjsServer = new ExpectationServer();
+    public ExpectationServerWrapper npmjsServer = new ExpectationServerWrapper();
 
     @Before
     public void before()

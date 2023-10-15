@@ -25,7 +25,7 @@ import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.core.io.IndyObjectMapper;
 import org.commonjava.indy.pkg.maven.model.MavenPackageTypeDescriptor;
 import org.commonjava.indy.test.fixture.core.CoreServerFixture;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,8 +44,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Check if the repo proxy addon can work correctly for several supported features enabled together, including:
@@ -61,7 +61,7 @@ public class RepoProxyFeaturesBundledTest
 {
 
     @Rule
-    public ExpectationServer server = new ExpectationServer( "" );
+    public ExpectationServerWrapper server = new ExpectationServerWrapper( "" );
 
     private final IndyObjectMapper mapper = new IndyObjectMapper( true );
 

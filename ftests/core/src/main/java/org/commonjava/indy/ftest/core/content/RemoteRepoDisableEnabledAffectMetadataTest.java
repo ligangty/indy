@@ -16,31 +16,22 @@
 package org.commonjava.indy.ftest.core.content;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
 import org.commonjava.indy.client.core.IndyClientException;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
-import org.commonjava.indy.ftest.core.category.TimingDependent;
 import org.commonjava.indy.model.core.ArtifactStore;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.HostedRepository;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.indy.test.fixture.core.CoreServerFixture;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
-import static org.commonjava.indy.model.core.StoreType.group;
-import static org.commonjava.indy.model.core.StoreType.remote;
 import static org.commonjava.maven.galley.io.SpecialPathConstants.PKG_TYPE_MAVEN;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Check that the group's metadata is deleted when member repo is disabled/enabled.
@@ -121,7 +112,7 @@ public class RemoteRepoDisableEnabledAffectMetadataTest
     private RemoteRepository b;
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Before
     public void setupRepos() throws Exception

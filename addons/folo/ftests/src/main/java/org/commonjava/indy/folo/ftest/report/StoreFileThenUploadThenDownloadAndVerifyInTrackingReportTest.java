@@ -15,34 +15,23 @@
  */
 package org.commonjava.indy.folo.ftest.report;
 
-import org.apache.commons.io.IOUtils;
 import org.commonjava.indy.client.core.IndyClientException;
-import org.commonjava.indy.client.core.module.IndyContentClientModule;
-import org.commonjava.indy.client.core.util.UrlUtils;
 import org.commonjava.indy.folo.client.IndyFoloAdminClientModule;
 import org.commonjava.indy.folo.client.IndyFoloContentClientModule;
 import org.commonjava.indy.folo.dto.TrackedContentDTO;
 import org.commonjava.indy.folo.dto.TrackedContentEntryDTO;
 import org.commonjava.indy.ftest.core.category.EventDependent;
 import org.commonjava.indy.model.core.HostedRepository;
-import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.indy.model.core.StoreKey;
-import org.commonjava.test.http.expect.ExpectationServer;
 import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Set;
 
 import static org.commonjava.indy.model.core.StoreType.hosted;
-import static org.commonjava.indy.model.core.StoreType.remote;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @Category( EventDependent.class )
