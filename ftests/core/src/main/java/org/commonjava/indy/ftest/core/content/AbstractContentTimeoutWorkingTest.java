@@ -20,9 +20,7 @@ import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.galley.KeyedLocation;
 import org.commonjava.indy.util.LocationUtils;
-import org.commonjava.test.http.expect.ExpectationServer;
 import org.junit.Before;
-import org.junit.Rule;
 
 import java.io.File;
 import java.util.Date;
@@ -40,9 +38,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public abstract class AbstractContentTimeoutWorkingTest
         extends AbstractContentManagementTest
 {
-    @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
-
     protected KeyedLocation location;
 
     @Override

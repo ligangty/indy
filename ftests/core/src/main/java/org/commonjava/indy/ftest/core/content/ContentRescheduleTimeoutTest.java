@@ -21,18 +21,14 @@ import org.commonjava.indy.ftest.core.category.TimingDependent;
 import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.util.LocationUtils;
 import org.commonjava.maven.galley.model.Location;
-import org.commonjava.test.http.expect.ExpectationServer;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.io.InputStream;
 import java.util.Date;
 
 import static org.commonjava.indy.model.core.StoreType.remote;
-import static org.commonjava.indy.pkg.maven.model.MavenPackageTypeDescriptor.MAVEN_PKG_KEY;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,9 +40,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class ContentRescheduleTimeoutTest
         extends AbstractContentManagementTest
 {
-
-    @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
 
     @Test
     @Category( TimingDependent.class )

@@ -15,12 +15,6 @@
  */
 package org.commonjava.indy.folo.ftest.content;
 
-import static org.commonjava.indy.model.core.StoreType.group;
-import static org.commonjava.indy.model.core.StoreType.remote;
-
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.commonjava.indy.client.core.IndyClientModule;
 import org.commonjava.indy.folo.client.IndyFoloAdminClientModule;
 import org.commonjava.indy.folo.client.IndyFoloContentClientModule;
@@ -29,10 +23,16 @@ import org.commonjava.indy.ftest.core.category.EventDependent;
 import org.commonjava.indy.model.core.Group;
 import org.commonjava.indy.model.core.HostedRepository;
 import org.commonjava.indy.model.core.RemoteRepository;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.experimental.categories.Category;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.commonjava.indy.model.core.StoreType.group;
+import static org.commonjava.indy.model.core.StoreType.remote;
 
 @Category( EventDependent.class )
 public class AbstractFoloContentManagementTest
@@ -46,7 +46,7 @@ public class AbstractFoloContentManagementTest
     protected static final String PUBLIC = "public";
 
     @Rule
-    public ExpectationServer centralServer = new ExpectationServer();
+    public ExpectationServerWrapper centralServer = new ExpectationServerWrapper();
 
     @Before
     public void before()

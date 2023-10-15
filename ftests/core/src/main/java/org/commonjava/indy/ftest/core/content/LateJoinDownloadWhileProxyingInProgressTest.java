@@ -15,14 +15,6 @@
  */
 package org.commonjava.indy.ftest.core.content;
 
-import static org.commonjava.indy.model.core.StoreType.remote;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-
 import org.commonjava.indy.client.core.helper.PathInfo;
 import org.commonjava.indy.ftest.core.AbstractContentManagementTest;
 import org.commonjava.indy.ftest.core.category.TimingDependent;
@@ -31,17 +23,20 @@ import org.commonjava.indy.ftest.core.fixture.InputTimer;
 import org.commonjava.indy.ftest.core.fixture.ReluctantInputStream;
 import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.core.StoreKey;
-import org.commonjava.test.http.expect.ExpectationServer;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+
+import static org.commonjava.indy.model.core.StoreType.remote;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class LateJoinDownloadWhileProxyingInProgressTest
         extends AbstractContentManagementTest
 {
-
-    @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
 
     @Override
     protected boolean createStandardTestStructures()

@@ -18,7 +18,7 @@ package org.commonjava.indy.koji.content.testutil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.commonjava.test.http.expect.ExpectationHandler;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public final class KojiMockHandlers
     {
     }
 
-    public static void configureKojiServer( ExpectationServer server, String urlBase, AtomicInteger exchangeCounter,
+    public static void configureKojiServer( ExpectationServerWrapper server, String urlBase, AtomicInteger exchangeCounter,
                                             String resourceBase, boolean verifyArtifacts, String verifyBasepath )
     {
         try( InputStream scriptIn = Thread.currentThread().getContextClassLoader().getResourceAsStream( Paths.get(resourceBase, MOCK_SCRIPT_JSON).toString() ) )

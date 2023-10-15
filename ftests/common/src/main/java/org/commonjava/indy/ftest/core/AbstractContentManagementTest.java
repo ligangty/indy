@@ -45,7 +45,7 @@ import org.commonjava.indy.model.galley.KeyedLocation;
 import org.commonjava.maven.galley.cache.pathmapped.PathMappedCacheProvider;
 import org.commonjava.maven.galley.model.ConcreteResource;
 import org.commonjava.maven.galley.model.Location;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Before;
 import org.junit.Rule;
 
@@ -62,7 +62,7 @@ public class AbstractContentManagementTest
     protected static final String PUBLIC = "public";
 
     @Rule
-    public ExpectationServer server = new ExpectationServer( "repos" );
+    public ExpectationServerWrapper server = new ExpectationServerWrapper( "repos" );
 
     protected Thread newThread( final String named, final Runnable runnable )
     {

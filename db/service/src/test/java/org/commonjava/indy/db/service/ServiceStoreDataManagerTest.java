@@ -27,7 +27,7 @@ import org.commonjava.indy.model.core.io.IndyObjectMapper;
 import org.commonjava.indy.subsys.infinispan.CacheProducer;
 import org.commonjava.indy.subsys.service.IndyClientProducer;
 import org.commonjava.indy.subsys.service.config.RepositoryServiceConfig;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.junit.Before;
@@ -65,7 +65,7 @@ public class ServiceStoreDataManagerTest
     private static CacheProducer producer;
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     private ServiceStoreDataManager dataManager;
 

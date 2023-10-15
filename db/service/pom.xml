@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.commonjava.util</groupId>
-      <artifactId>http-testserver</artifactId>
+      <artifactId>http-testserver-junit4</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

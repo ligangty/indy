@@ -17,7 +17,6 @@ package org.commonjava.indy.folo.ftest.report;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.commonjava.indy.client.core.util.UrlUtils;
 import org.commonjava.indy.folo.client.IndyFoloAdminClientModule;
 import org.commonjava.indy.folo.client.IndyFoloContentClientModule;
 import org.commonjava.indy.folo.dto.TrackedContentDTO;
@@ -26,7 +25,7 @@ import org.commonjava.indy.ftest.core.category.EventDependent;
 import org.commonjava.indy.model.core.RemoteRepository;
 import org.commonjava.indy.model.core.StoreKey;
 import org.commonjava.indy.test.fixture.core.CoreServerFixture;
-import org.commonjava.test.http.expect.ExpectationServer;
+import org.commonjava.test.http.junit4.expect.ExpectationServerWrapper;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class RetrieveTrackingReportAfterCacheExpirationTest
 {
 
     @Rule
-    public ExpectationServer server = new ExpectationServer();
+    public ExpectationServerWrapper server = new ExpectationServerWrapper();
 
     @Override
     protected void initTestConfig( CoreServerFixture fixture )
